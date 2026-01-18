@@ -40,7 +40,15 @@ app.get('/', (c) => {
 })
 
 serve({
-  fetch: app.fetch,
+  fetch: (req) => {
+    const url = new URL(req.url)
+    // Check forwarded protocol header to determine if the request is secure
+    if (url.protocol === 'http:' && req.headers.get('x-forwarded-proto') === 'https') {
+      url.protocol = 'https:'
+    }
+    const modifiedRequest = new Request(url.toString(), req)
+    return app.fetch(modifiedRequest)
+  },
   port: env.PORT
 }, (info) => {
   console.log(`Server is running on http://localhost:${info.port}`)
