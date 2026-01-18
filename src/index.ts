@@ -26,7 +26,8 @@ app.use('*', (c, next) => {
     scheme: url.protocol.replace(':', ''),
     host: url.host,
     path: url.pathname,
-    fullUrl: c.req.url
+    fullUrl: c.req.url,
+    "x-forwarded-proto": c.req.header('x-forwarded-proto') || null
   }))
   return next()
 })
