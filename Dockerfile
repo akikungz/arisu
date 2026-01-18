@@ -1,7 +1,7 @@
 FROM node:lts-alpine AS base
 
 RUN apk update && apk upgrade && \
-  apk add --no-cache ca-certificates && \
+  apk add --no-cache ca-certificates openssl && \
   update-ca-certificates
 
 WORKDIR /app
