@@ -54,6 +54,7 @@ export const auth = betterAuth({
   },
   advanced: {
     disableCSRFCheck: true,
+    trustedProxyHeaders: true,
     ...(
       env.NODE_ENV === "production"
         ? {
