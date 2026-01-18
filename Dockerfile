@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install dependencies
 FROM base AS deps
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml tsconfig.json ./
 RUN corepack enable pnpm && \
   corepack prepare pnpm@latest --activate && \
   pnpm install --frozen-lockfile
@@ -28,6 +28,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 hono
 
 COPY --from=builder --chown=hono:nodejs /app/dist ./dist
+COPY --from=builder --chown=hono:nodejs /app/src/prisma/generated ./dist/src/prisma/generated
 COPY --from=builder --chown=hono:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=hono:nodejs /app/package.json ./package.json
 
@@ -35,4 +36,4 @@ USER hono
 
 EXPOSE 3000
 
-CMD ["node", "dist/src/index.js"]
+CMD ["node", "./dist/src/index.js"]

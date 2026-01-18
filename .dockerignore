@@ -31,3 +31,7 @@ lerna-debug.log*
 # prisma
 **/prisma/generated
 **/prisma/migrations
+
+# Dockerfile
+docker-compose.*
+Dockerfile*
