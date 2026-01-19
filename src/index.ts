@@ -1,11 +1,20 @@
+import { startInstrumentation } from './instrumentation.js'
+
+// Initialize OpenTelemetry instrumentation before other imports
+startInstrumentation()
+
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { logger } from 'hono/logger'
+import { httpInstrumentationMiddleware } from '@hono/otel'
 
 import { authHandler } from './auth.js'
 import { env } from './env.js'
 
 const app = new Hono()
+
+// OpenTelemetry middleware for Hono
+app.use('*', httpInstrumentationMiddleware())
 
 // JSON Logger middleware
 app.use('*', logger((message, ...rest) => {
