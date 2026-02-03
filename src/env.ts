@@ -29,6 +29,7 @@ export const TelemetryEnvSchema = z.object({
     .default("info"),
   LOG_FORMAT: z.enum(["json", "plain"]).default("plain"),
   LOG_PRETTY: z.coerce.boolean().default(false),
+  LOG_LOKI_ENDPOINT: z.url().optional(),
 });
 
 export const EnvSchema = z.object({

@@ -10,6 +10,7 @@ import { httpInstrumentationMiddleware } from '@hono/otel'
 
 import { authHandler } from './auth.js'
 import { env } from './env.js'
+import { register, httpRequestsTotal, httpRequestDuration } from './metrics.js'
 
 const app = new Hono()
 
@@ -39,6 +40,41 @@ app.use('*', (c, next) => {
     "x-forwarded-proto": c.req.header('x-forwarded-proto') || null
   }))
   return next()
+})
+
+// Prometheus metrics middleware (skip /metrics path to avoid recursion)
+app.use('*', async (c, next) => {
+  const path = new URL(c.req.url).pathname
+  if (path === '/metrics') {
+    return next()
+  }
+
+  const start = Date.now()
+  await next()
+  const duration = (Date.now() - start) / 1000
+
+  httpRequestsTotal.inc({
+    method: c.req.method,
+    path: path,
+    status: c.res.status.toString(),
+  })
+
+  httpRequestDuration.observe(
+    {
+      method: c.req.method,
+      path: path,
+      status: c.res.status.toString(),
+    },
+    duration
+  )
+})
+
+// Prometheus metrics endpoint
+app.get('/metrics', async (c) => {
+  const metrics = await register.metrics()
+  return c.text(metrics, 200, {
+    'Content-Type': register.contentType,
+  })
 })
 
 // Mount better-auth routes
