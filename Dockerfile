@@ -36,8 +36,7 @@ COPY --from=builder --chown=hono:nodejs /app/src/prisma/generated ./dist/src/pri
 COPY --from=builder --chown=hono:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=hono:nodejs /app/package.json ./package.json
 
-# Copy Prisma runtime files needed for the client engine
-COPY --from=deps --chown=hono:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+# Ensure Prisma client runtime files from deps stage (after prisma generate)
 COPY --from=deps --chown=hono:nodejs /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
 USER hono
