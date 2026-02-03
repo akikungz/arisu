@@ -13,15 +13,16 @@ RUN corepack enable pnpm && \
   corepack prepare pnpm@latest --activate && \
   pnpm install --frozen-lockfile
 
-COPY src/prisma/schema.prisma ./src/prisma/schema.prisma
-
-RUN pnpm dlx prisma generate --schema=./src/prisma/schema.prisma
-
 # Build the app
 FROM base AS builder
+RUN corepack enable pnpm && \
+  corepack prepare pnpm@latest --activate
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/src/prisma ./src/prisma
 COPY . .
+
+# Generate Prisma client with all source files in place
+RUN pnpm dlx prisma generate --schema=./src/prisma/schema.prisma
+
 RUN npm run build
 
 # Production image
@@ -35,9 +36,6 @@ COPY --from=builder --chown=hono:nodejs /app/dist ./dist
 COPY --from=builder --chown=hono:nodejs /app/src/prisma/generated ./dist/src/prisma/generated
 COPY --from=builder --chown=hono:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=hono:nodejs /app/package.json ./package.json
-
-# Ensure Prisma client runtime files from deps stage (after prisma generate)
-COPY --from=deps --chown=hono:nodejs /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
 USER hono
 
