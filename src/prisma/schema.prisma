@@ -1,7 +1,7 @@
 generator client {
   provider   = "prisma-client"
   output     = "./generated"
-  engineType = "client"
+  engineType = "library"
   runtime    = "nodejs"
 }
 
